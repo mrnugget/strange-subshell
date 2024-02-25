@@ -31,3 +31,6 @@ Why?!
 - `stty -a` is unchanged before and after
 - Process can still receive interrupt signal (`kill -INT`) and exits
 - It's only `Ctrl-c` that doesn't work anymore.
+- It happens for me with `/bin/zsh` (the macOS built-in one) and the homebrew `zsh`
+- It does _NOT_ happen with `/bin/bash` (!!!)
+- It happens even if I run `zsh` with `--no-rcs` and/or comment out my `.zprofile`/`.zshrc`/`.profile` completely. I can run ZSH without any config files (`-f` to disable files and `-d` to disable global config files) and it still happens.

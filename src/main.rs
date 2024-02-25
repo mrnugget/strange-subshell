@@ -12,11 +12,15 @@ fn main() {
     })
     .expect("Error setting Ctrl-C handler");
 
-    let mut cmd = Command::new("/opt/homebrew/bin/zsh");
-
-    cmd.stdin(process::Stdio::inherit());
+    let mut cmd = Command::new("/bin/zsh");
     // When I run this, I can't `ctrl-c` the program anymore:
-    cmd.args(&["-i", "-c", "ls;"]);
+    cmd.args(&[
+        "-i",       // interactive shell, because that's what we want
+        "--no-rcs", // no rc files
+        "-f",       // no rc files, again, for good measure
+        "-d",       // no global rc files,
+        "-c", "ls;", // just run `ls`
+    ]);
 
     // But if it's this, I can `ctrl-c`:
     // cmd.args(&["-l", "-i", "-c", "ls; echo FOOBAR"]);
