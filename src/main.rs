@@ -16,7 +16,7 @@ fn main() {
 
     cmd.stdin(process::Stdio::inherit());
     // When I run this, I can't `ctrl-c` the program anymore:
-    cmd.args(&["-i", "-c", "ls; echo FOOBAR"]);
+    cmd.args(&["-i", "-c", "ls;"]);
 
     // But if it's this, I can `ctrl-c`:
     // cmd.args(&["-l", "-i", "-c", "ls; echo FOOBAR"]);
@@ -36,9 +36,16 @@ fn main() {
     }
 
     println!("Try to hit ctrl-c to exit the program");
+    let mut sleeps = 0;
     loop {
         thread::sleep(Duration::from_secs(1));
         println!("Still running.... Hit ctrl-c to try to exit the program. Or send INT manually: `kill -2 {}`", std::process::id());
+
+        sleeps += 1;
+        if sleeps > 10 {
+            println!("alright, exiting now on my own.");
+            break;
+        }
     }
 }
 
