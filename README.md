@@ -33,4 +33,10 @@ Why?!
 - It's only `Ctrl-c` that doesn't work anymore.
 - It happens for me with `/bin/zsh` (the macOS built-in one) and the homebrew `zsh`
 - It does _NOT_ happen with `/bin/bash` (!!!)
+- It does _NOT_ happen with `/opt/homebrew/bin/fish` (!!!)
 - It happens even if I run `zsh` with `--no-rcs` and/or comment out my `.zprofile`/`.zshrc`/`.profile` completely. I can run ZSH without any config files (`-f` to disable files and `-d` to disable global config files) and it still happens.
+- It's not just `Ctrl-c` that doesn't work anymore: `ctrl-z` (suspend) and `ctrl-\` (quit) also don't work anymore.
+
+## Resources/Maybes/...
+
+- Fish issue on process groups: https://github.com/fish-shell/fish-shell/issues/7060#issuecomment-636421938
