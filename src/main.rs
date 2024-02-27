@@ -19,7 +19,7 @@ fn main() {
         "--no-rcs", // no rc files
         "-f",       // no rc files, again, for good measure
         "-d",       // no global rc files,
-        "-c", "ls;", // just run `ls`
+        "-c", "ls",
     ]);
 
     // But if it's this, I can `ctrl-c`:

@@ -40,3 +40,5 @@ Why?!
 ## Resources/Maybes/...
 
 - Fish issue on process groups: https://github.com/fish-shell/fish-shell/issues/7060#issuecomment-636421938
+
+- Is it maybe that `/usr/bin/env` and `ls` (both which trigger it) aren't shell built-ins, but `echo` and `exit` etc are?
