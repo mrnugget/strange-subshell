@@ -1,9 +1,12 @@
+use libc;
+use std::os::unix::process::CommandExt; // for pre_exec
 use std::process::{self, Command};
 use std::thread;
-use std::time::Duration;
+use std::time::Duration; // ensure you've added libc to your dependencies
 
 fn main() {
     println!("Parent PID is {}", std::process::id());
+    println!("Parent Process Group ID is {:?}", rustix::process::getgid());
     let stty_before = get_stty_settings();
 
     ctrlc::set_handler(move || {
@@ -29,6 +32,17 @@ fn main() {
     //
     // I just launch a subprocess that exits. How can it hijack my signal handling?
 
+    // BUT THIS FIXES IT!! When I set a new session ID on the sub process, it doesn't seem to take over control
+    // of my terminal.
+    unsafe {
+        cmd.pre_exec(|| {
+            if libc::setsid() == -1 {
+                return Err(std::io::Error::last_os_error());
+            }
+            Ok(())
+        });
+    }
+
     let output = cmd.output().expect("Failed to execute command");
     println!("child exited with status: {}", &output.status);
 
@@ -39,6 +53,10 @@ fn main() {
         println!("after: {}", stty_after);
     }
 
+    println!(
+        "AFTER running the process. Parent Process Group ID is {:?}",
+        rustix::process::getgid()
+    );
     println!("Try to hit ctrl-c to exit the program");
     let mut sleeps = 0;
     loop {
