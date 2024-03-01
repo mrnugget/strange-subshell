@@ -52,6 +52,14 @@ unsafe {
 
 So it is related to session IDs!
 
+GPT4 thinks this helps, because:
+
+> When zsh executes a non-builtin command (like `ls` in your example), it typically forks a child process for the command and may create a new process group for this child, especially in interactive mode or when job control is involved. zsh, as the parent of this command, can become the process group leader for the command it executes.
+> As the process group leader, zsh can receive signals meant for the group. This includes SIGINT (triggered by ctrl-c) intended to interrupt the current foreground job.
+> The terminal is associated with a foreground process group. When ctrl-c is pressed, the terminal sends SIGINT to the foreground process group.
+> If `zsh` changes the foreground process group of the terminal to its own new group for the command it's executing, then SIGINT would go to zsh and its child processes, not your Rust program.
+> In theory, when zsh exits, it should clean up, restoring the original process group as the terminal's foreground group. However, the intricacies of how zsh handles exit and cleanup, especially after launching interactive sessions or commands, might not always revert all changes perfectly, particularly in how signals are handled or how the terminal's foreground process group is managed.
+
 ## Resources/Maybes/...
 
 - Fish issue on process groups: https://github.com/fish-shell/fish-shell/issues/7060#issuecomment-636421938

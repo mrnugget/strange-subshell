@@ -34,14 +34,14 @@ fn main() {
 
     // BUT THIS FIXES IT!! When I set a new session ID on the sub process, it doesn't seem to take over control
     // of my terminal.
-    unsafe {
-        cmd.pre_exec(|| {
-            if libc::setsid() == -1 {
-                return Err(std::io::Error::last_os_error());
-            }
-            Ok(())
-        });
-    }
+    // unsafe {
+    //     cmd.pre_exec(|| {
+    //         if libc::setsid() == -1 {
+    //             return Err(std::io::Error::last_os_error());
+    //         }
+    //         Ok(())
+    //     });
+    // }
 
     let output = cmd.output().expect("Failed to execute command");
     println!("child exited with status: {}", &output.status);
