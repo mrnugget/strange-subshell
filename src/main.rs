@@ -1,12 +1,15 @@
 use libc;
 use std::os::unix::process::CommandExt; // for pre_exec
 use std::process::{self, Command};
-use std::thread;
-use std::time::Duration; // ensure you've added libc to your dependencies
+use std::time::Duration;
+use std::{io, thread}; // ensure you've added libc to your dependencies
 
 fn main() {
     println!("Parent PID is {}", std::process::id());
     println!("Parent Process Group ID is {:?}", rustix::process::getgid());
+    let fg_pgid_before = get_foreground_process_group(0).unwrap();
+    println!("Foreground process group before: {}", fg_pgid_before);
+
     let stty_before = get_stty_settings();
 
     ctrlc::set_handler(move || {
@@ -46,6 +49,24 @@ fn main() {
     let output = cmd.output().expect("Failed to execute command");
     println!("child exited with status: {}", &output.status);
 
+    let fg_pgid_after = get_foreground_process_group(0).unwrap();
+    println!("Foreground process group after: {}", fg_pgid_after);
+
+    // Execute `ps` command to list processes by PGID 21875
+    let output = Command::new("ps")
+        .arg("-eo")
+        .arg("pid,pgid,cmd")
+        .output()
+        .expect("failed to execute process");
+
+    let output_str = String::from_utf8_lossy(&output.stdout);
+    for line in output_str.split('\n') {
+        if line.contains(format!("{}", fg_pgid_after).as_str()) {
+            // Filter lines containing the new PGID
+            println!("{}", line);
+        }
+    }
+
     let stty_after = get_stty_settings();
     if stty_before != stty_after {
         println!("stty settings changed!");
@@ -79,4 +100,13 @@ fn get_stty_settings() -> String {
         .expect("Failed to execute command");
 
     String::from_utf8_lossy(&output.stdout).to_string()
+}
+
+fn get_foreground_process_group(fd: i32) -> io::Result<libc::pid_t> {
+    let pgid = unsafe { libc::tcgetpgrp(fd) };
+    if pgid == -1 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(pgid)
+    }
 }
