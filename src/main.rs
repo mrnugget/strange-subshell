@@ -5,6 +5,9 @@ use std::time::Duration;
 use std::{io, thread}; // ensure you've added libc to your dependencies
 
 fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    let use_preexec = args.contains(&"--fix".to_string());
+
     println!("Parent PID is {}", std::process::id());
     println!("Parent Process Group ID is {:?}", rustix::process::getgid());
     let fg_pgid_before = get_foreground_process_group(0).unwrap();
@@ -37,14 +40,16 @@ fn main() {
 
     // BUT THIS FIXES IT!! When I set a new session ID on the sub process, it doesn't seem to take over control
     // of my terminal.
-    // unsafe {
-    //     cmd.pre_exec(|| {
-    //         if libc::setsid() == -1 {
-    //             return Err(std::io::Error::last_os_error());
-    //         }
-    //         Ok(())
-    //     });
-    // }
+    if use_preexec {
+        unsafe {
+            cmd.pre_exec(|| {
+                if libc::setsid() == -1 {
+                    return Err(std::io::Error::last_os_error());
+                }
+                Ok(())
+            });
+        }
+    }
 
     let output = cmd.output().expect("Failed to execute command");
     println!("child exited with status: {}", &output.status);
@@ -52,7 +57,6 @@ fn main() {
     let fg_pgid_after = get_foreground_process_group(0).unwrap();
     println!("Foreground process group after: {}", fg_pgid_after);
 
-    // Execute `ps` command to list processes by PGID 21875
     let output = Command::new("ps")
         .arg("-eo")
         .arg("pid,pgid,cmd")
