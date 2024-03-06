@@ -9,3 +9,5 @@ edition = "2021"
 ctrlc = "3.4"
 rustix = { version = "0.38.31", features = ["process"] }
 libc = "0.2"
+[profile.release]
+debug = true
