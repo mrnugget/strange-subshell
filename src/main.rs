@@ -1,4 +1,3 @@
-use libc;
 use std::os::unix::process::CommandExt; // for pre_exec
 use std::process::{self, Command};
 use std::time::Duration;
@@ -23,7 +22,7 @@ fn main() {
 
     let mut cmd = Command::new("/bin/zsh");
     // When I run this, I can't `ctrl-c` the program anymore:
-    cmd.args(&[
+    cmd.args([
         "-i",       // interactive shell, because that's what we want
         "--no-rcs", // no rc files
         "-f",       // no rc files, again, for good measure
