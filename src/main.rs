@@ -3,13 +3,15 @@ use std::process::{self, Command};
 use std::time::Duration;
 use std::{io, thread}; // ensure you've added libc to your dependencies
 
+mod shell_env;
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let use_preexec = args.contains(&"--fix".to_string());
 
     println!("Parent PID is {}", std::process::id());
     println!("Parent Process Group ID is {:?}", rustix::process::getgid());
-    let fg_pgid_before = get_foreground_process_group(0).unwrap();
+    let fg_pgid_before = get_process_group_id(0).unwrap();
     println!("Foreground process group before: {}", fg_pgid_before);
 
     let stty_before = get_stty_settings();
@@ -53,7 +55,7 @@ fn main() {
     let output = cmd.output().expect("Failed to execute command");
     println!("child exited with status: {}", &output.status);
 
-    let fg_pgid_after = get_foreground_process_group(0).unwrap();
+    let fg_pgid_after = get_process_group_id(0).unwrap();
     println!("Foreground process group after: {}", fg_pgid_after);
 
     let output = Command::new("ps")
@@ -105,7 +107,7 @@ fn get_stty_settings() -> String {
     String::from_utf8_lossy(&output.stdout).to_string()
 }
 
-fn get_foreground_process_group(fd: i32) -> io::Result<libc::pid_t> {
+fn get_process_group_id(fd: i32) -> io::Result<libc::pid_t> {
     let pgid = unsafe { libc::tcgetpgrp(fd) };
     if pgid == -1 {
         Err(io::Error::last_os_error())
